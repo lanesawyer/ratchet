@@ -1,1 +1,12 @@
-(items:{("test","test"):("test_file","ehahfhea",[(1,1,"wat")])})
+(
+    version: 1,
+    rules: {
+        "No more TODOs": {
+            ("src/config.rs", "hash_me"): [(148, 152, "TODO", "hash_me"), (309, 313, "TODO", "hash_me")],
+            ("src/ratchet.rs", "hash_me"): [(390, 394, "TODO", "hash_me"), (683, 687, "TODO", "hash_me"), (1140, 1144, "TODO", "hash_me"), (2512, 2516, "TODO", "hash_me")],
+        },
+        "No more HACKS": {
+            ("src/ratchet.rs", "hash_me"): [(969, 973, "HACK( ALERT)?", "hash_me")],
+        },
+    },
+)
