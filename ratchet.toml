@@ -1,0 +1,9 @@
+version = 1
+
+[rules]
+
+[rules."No more TODOs"]
+regex = "TODO"
+
+[rules."No more HACKS"]
+regex = "HACK( ALERT)?"

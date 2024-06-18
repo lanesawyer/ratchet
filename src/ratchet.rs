@@ -4,17 +4,22 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RatchetFile {
-    pub items: HashMap<(FileName, FileHash), RatchetItem>,
+    pub version: u8,
+    pub rules: HashMap<RuleName, RuleMap>,
 }
 
-pub type RatchetItem = (FileName, FileHash, Problems);
+pub type RuleName = String;
+// TODO: Probably don't need file name and hash as the key
+pub type RuleMap = HashMap<(FileName, FileHash), Problems>;
 
 type FileName = String;
 type FileHash = String;
 type Problems = Vec<Problem>;
 
-type Problem = (Line, Column, Message);
+type Problem = (Start, End, MessageText, MessageHash);
 
-type Line = u32;
-type Column = u32;
-type Message = String;
+type Start = usize;
+type End = usize;
+// TODO: The next two could be optional, rules like regex won't have a unique message
+type MessageText = String;
+type MessageHash = String;
