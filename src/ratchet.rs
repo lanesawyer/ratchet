@@ -88,6 +88,7 @@ pub fn turn() {
         .enumerate_arrays(true);
     let ron =
         ron::ser::to_string_pretty(&ratchet_file, pretty_config).expect("Serialization failed");
+    let ron = format!("{}\n", ron);
 
     let mut file = File::create("ratchet.ron").expect("Failed to create file");
     file.write_all(ron.as_bytes())
