@@ -2,6 +2,7 @@ use regex::Regex;
 use ron::ser::PrettyConfig;
 use serde::{Deserialize, Serialize};
 use std::{
+    cmp::Ordering,
     collections::HashMap,
     fs::{read_to_string, File},
     io::Write,
@@ -10,10 +11,35 @@ use walkdir::WalkDir;
 
 use crate::config::read_config;
 
+const RATCHET_FILE: &str = "ratchet.ron";
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RatchetFile {
     pub version: u8,
     pub rules: HashMap<RuleName, RuleMap>,
+}
+
+impl RatchetFile {
+    // TODO: Custom file location
+    pub fn load() -> Self {
+        let contents = read_to_string(RATCHET_FILE).expect("Failed to read file");
+        ron::de::from_str(&contents).expect("Failed to deserialize")
+    }
+
+    // TODO: Custom file location
+    pub fn save(&self) {
+        // TODO: Deterministic order on the hashmap printing
+        let pretty_config = PrettyConfig::new()
+            .depth_limit(4)
+            .separate_tuple_members(true)
+            .enumerate_arrays(true);
+        let ron = ron::ser::to_string_pretty(self, pretty_config).expect("Serialization failed");
+        let ron = format!("{}\n", ron);
+
+        let mut file = File::create(RATCHET_FILE).expect("Failed to create file");
+        file.write_all(ron.as_bytes())
+            .expect("Failed to write to file");
+    }
 }
 
 pub type RuleName = String;
@@ -39,9 +65,21 @@ pub fn init() {
 pub fn turn() {
     println!("turning ratchet!");
 
+    process_rules(false);
+}
+
+pub fn check() {
+    println!("checking ratchet!");
+    process_rules(true)
+}
+
+fn process_rules(is_check: bool) {
     let config = read_config();
-    // HACK: Test hack comment to get it in the ratchet.ron file
+    // HACK: Test comment to get it in the RATCHET_FILE file
     print!("config: {:?}", config);
+
+    let previous_ratchet = RatchetFile::load();
+    println!("Previous Ratchet: {:?}", previous_ratchet);
 
     let mut rules_map: HashMap<RuleName, RuleMap> = HashMap::new();
 
@@ -59,7 +97,15 @@ pub fn turn() {
                 continue;
             }
 
-            let content = read_to_string(entry.path()).expect("Failed to read file");
+            // TODO: Got error running on another codebase:
+            // Failed to read file: Error { kind: InvalidData, message: "stream did not contain valid UTF-8" }
+            let content = read_to_string(entry.path());
+            if let Err(e) = content {
+                println!("Failed to read file: {:?}", e);
+                continue;
+            }
+            let content = content.unwrap();
+
             let matches: Vec<_> = regex.find_iter(&content).collect();
             for found in matches {
                 println!("Matched! {} {:?}", entry.path().display(), found);
@@ -81,20 +127,37 @@ pub fn turn() {
         version: config.version,
         rules: rules_map,
     };
-    // TODO: Deterministic order on the hashmap printing
-    let pretty_config = PrettyConfig::new()
-        .depth_limit(3)
-        .separate_tuple_members(true)
-        .enumerate_arrays(true);
-    let ron =
-        ron::ser::to_string_pretty(&ratchet_file, pretty_config).expect("Serialization failed");
-    let ron = format!("{}\n", ron);
 
-    let mut file = File::create("ratchet.ron").expect("Failed to create file");
-    file.write_all(ron.as_bytes())
-        .expect("Failed to write to file");
-}
+    // for each rule, see if it got better or worse than the previous
+    for (rule, previous_rule_items) in &previous_ratchet.rules {
+        match ratchet_file.rules.get(rule) {
+            Some(new_rule) => {
+                for (key, value) in previous_rule_items {
+                    match new_rule.get(key) {
+                        Some(new_value) => match new_value.len().cmp(&value.len()) {
+                            Ordering::Greater => {
+                                println!("Rule {} has more items in the current file", rule);
+                            }
+                            Ordering::Less => {
+                                println!("Rule {} has fewer items in the current file", rule);
+                            }
+                            Ordering::Equal => {
+                                println!(
+                                    "Rule {} has the same number of items in both files",
+                                    rule
+                                );
+                            }
+                        },
+                        None => println!("Key: {:?} does not exist in the current file", key),
+                    }
+                    println!("Key: {:?}, Value: {:?}", key, value);
+                }
+            }
+            None => println!("Rule {} does not exist in the current file", rule),
+        }
+    }
 
-pub fn check() {
-    println!("checking ratchet!");
+    if !is_check {
+        ratchet_file.save();
+    }
 }
