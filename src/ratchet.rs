@@ -59,10 +59,10 @@ type End = usize;
 type MessageText = String;
 type MessageHash = String;
 
-pub fn init() {
+pub fn init(config: &String) {
     println!("initializing ratchet!");
 
-    let path = Path::new(RATCHET_CONFIG);
+    let path = Path::new(config);
     if path.exists() {
         println!("Ratchet config already exists");
         return;
@@ -71,19 +71,18 @@ pub fn init() {
     config::RatchetConfig::init();
 }
 
-pub fn turn() {
-    println!("turning ratchet!");
-
-    process_rules(false);
+pub fn turn(config: &String) {
+    println!("Turning ratchet!");
+    process_rules(config, false);
 }
 
-pub fn check() {
-    println!("checking ratchet!");
-    process_rules(true)
+pub fn check(config: &String) {
+    println!("Checking ratchet!");
+    process_rules(config, true)
 }
 
-fn process_rules(is_check: bool) {
-    let config = read_config();
+fn process_rules(config_path: &String, is_check: bool) {
+    let config = read_config(config_path);
     // HACK: Test comment to get it in the RATCHET_FILE file
 
     let previous_ratchet = RatchetFile::load();
