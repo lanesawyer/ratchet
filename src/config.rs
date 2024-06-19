@@ -34,15 +34,14 @@ impl RatchetConfig {
 
         let toml = format!("{}\n", toml);
 
-        let mut file = fs::File::create("ratchet.toml").expect("Failed to create file");
+        let mut file = fs::File::create(RATCHET_CONFIG).expect("Failed to create file");
         file.write_all(toml.as_bytes())
             .expect("Failed to write to file");
     }
 }
 
-pub fn read_config() -> RatchetConfig {
-    let contents =
-        fs::read_to_string("ratchet.toml").expect("Something went wrong reading the file");
+pub fn read_config(config_path: &String) -> RatchetConfig {
+    let contents = fs::read_to_string(config_path).expect("Something went wrong reading the file");
 
     let ratchet_config: RatchetConfig = toml::from_str(&contents).expect("Failed to deserialize");
 
