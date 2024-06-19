@@ -170,6 +170,8 @@ fn process_rules(config_path: &String, is_check: bool) {
         rules: rules_map,
     };
 
+    let mut got_worse = false;
+
     // for each rule, see if it got better or worse than the previous
     for (rule, previous_rule_items) in &previous_ratchet.rules {
         let mut previous_rule_count = 0;
@@ -190,6 +192,7 @@ fn process_rules(config_path: &String, is_check: bool) {
             None => println!("Rule {} does not exist in the current file", rule),
         }
 
+        got_worse = new_rule_count > previous_rule_count;
         match new_rule_count.cmp(&previous_rule_count) {
             Ordering::Greater => {
                 println!("❌ Rule {} got worse", rule);
@@ -203,7 +206,9 @@ fn process_rules(config_path: &String, is_check: bool) {
         }
     }
 
-    if !is_check {
+    // TODO: Get wrose, don't update
+    // We don't want to update if we're just checking the state of the code or if things got worse
+    if !is_check && !got_worse {
         ratchet_file.save();
     }
 }

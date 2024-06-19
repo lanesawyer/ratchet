@@ -48,5 +48,5 @@ fn main() {
     }
 
     let duration = start.elapsed().as_secs_f32();
-    println!("⚡Ratchet finished in {:.2}s", duration);
+    println!("\n⚡Ratchet finished in {:.2}s", duration);
 }
