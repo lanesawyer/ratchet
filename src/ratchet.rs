@@ -3,7 +3,7 @@ use ron::ser::PrettyConfig;
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
-    collections::HashMap,
+    collections::BTreeMap,
     fs::{read_to_string, File},
     io::Write,
     path::Path,
@@ -17,7 +17,7 @@ const RATCHET_FILE: &str = "ratchet.ron";
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RatchetFile {
     pub version: u8,
-    pub rules: HashMap<RuleName, RuleMap>,
+    pub rules: BTreeMap<RuleName, RuleMap>,
 }
 
 impl RatchetFile {
@@ -29,7 +29,7 @@ impl RatchetFile {
 
     // TODO: Custom file location
     pub fn save(&self) {
-        // TODO: Deterministic order on the hashmap printing
+        // TODO: Deterministic order on the BTreeMap printing
         let pretty_config = PrettyConfig::new()
             .depth_limit(4)
             .separate_tuple_members(true)
@@ -45,7 +45,7 @@ impl RatchetFile {
 
 pub type RuleName = String;
 // TODO: Probably don't need file name and hash as the key
-pub type RuleMap = HashMap<(FileName, FileHash), Problems>;
+pub type RuleMap = BTreeMap<(FileName, FileHash), Problems>;
 
 type FileName = String;
 type FileHash = String;
@@ -88,11 +88,11 @@ fn process_rules(is_check: bool) {
 
     let previous_ratchet = RatchetFile::load();
 
-    let mut rules_map: HashMap<RuleName, RuleMap> = HashMap::new();
+    let mut rules_map: BTreeMap<RuleName, RuleMap> = BTreeMap::new();
 
     // TODO: Parallelize this someday
     config.rules.iter().for_each(|(key, value)| {
-        let mut rule_map = HashMap::new();
+        let mut rule_map = BTreeMap::new();
 
         let regex = Regex::new(&value.regex).expect("Failed to compile regex");
 
