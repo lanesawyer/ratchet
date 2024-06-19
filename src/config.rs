@@ -1,18 +1,37 @@
-use std::{collections::HashMap, fs};
+use std::{collections::HashMap, fs, io::Write};
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize)]
+pub const RATCHET_CONFIG: &str = "ratchet.toml";
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct RatchetConfig {
     pub version: u8,
     // TODO: I don't think I like this structure, revisit
     pub rules: HashMap<String, RatchetRule>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct RatchetRule {
     // TODO: Definitely revisit, not every rule is regex
     pub regex: String,
+}
+
+impl RatchetConfig {
+    pub fn init() {
+        let ratchet_config = RatchetConfig {
+            version: 1,
+            rules: HashMap::new(),
+        };
+
+        let toml = toml::to_string(&ratchet_config).expect("Failed to serialize");
+
+        let toml = format!("{}\n", toml);
+
+        let mut file = fs::File::create("ratchet.toml").expect("Failed to create file");
+        file.write_all(toml.as_bytes())
+            .expect("Failed to write to file");
+    }
 }
 
 pub fn read_config() -> RatchetConfig {
