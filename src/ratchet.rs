@@ -85,10 +85,8 @@ pub fn check() {
 fn process_rules(is_check: bool) {
     let config = read_config();
     // HACK: Test comment to get it in the RATCHET_FILE file
-    print!("config: {:?}", config);
 
     let previous_ratchet = RatchetFile::load();
-    println!("Previous Ratchet: {:?}", previous_ratchet);
 
     let mut rules_map: HashMap<RuleName, RuleMap> = HashMap::new();
 
@@ -96,10 +94,7 @@ fn process_rules(is_check: bool) {
     config.rules.iter().for_each(|(key, value)| {
         let mut rule_map = HashMap::new();
 
-        println!("Rule: {}", key);
-        println!("Regexp: {}", value.regex);
         let regex = Regex::new(&value.regex).expect("Failed to compile regex");
-        println!("Regex: {:?}", regex);
 
         // TODO: Clean the regexes up
         let include_regex = value
@@ -114,11 +109,20 @@ fn process_rules(is_check: bool) {
 
         for entry in WalkDir::new(".") {
             let entry = entry.unwrap();
+            // If it's not a file, there's nothing to analyze. Keep going!
             if !entry.file_type().is_file() {
                 continue;
             }
 
             let path_str = entry.path().to_string_lossy();
+
+            // TODO: Better way to ignore well-known files
+            if path_str.ends_with(RATCHET_FILE)
+                || path_str.ends_with(RATCHET_CONFIG)
+                || path_str.contains(".git")
+            {
+                continue;
+            }
 
             if include_regex.is_some() && !include_regex.as_ref().unwrap().is_match(&path_str) {
                 println!(
@@ -141,15 +145,14 @@ fn process_rules(is_check: bool) {
             // TODO: Got error running on another codebase:
             // Failed to read file: Error { kind: InvalidData, message: "stream did not contain valid UTF-8" }
             let content = read_to_string(entry.path());
-            if let Err(e) = content {
-                println!("Failed to read file, continuing: {:?}", e);
+            if let Err(_e) = content {
+                // println!("Failed to read file, continuing: {:?}", e);
                 continue;
             }
             let content = content.unwrap();
 
             let matches: Vec<_> = regex.find_iter(&content).collect();
             for found in matches {
-                println!("Matched! {} {:?}", entry.path().display(), found);
                 let key = (entry.path().display().to_string(), "hash_me".to_string());
                 let value = (
                     found.start(),
@@ -159,7 +162,6 @@ fn process_rules(is_check: bool) {
                 );
                 rule_map.entry(key).or_insert_with(Vec::new).push(value);
             }
-            println!("{}", entry.path().display());
         }
         rules_map.insert(key.to_string(), rule_map);
     });
@@ -171,30 +173,34 @@ fn process_rules(is_check: bool) {
 
     // for each rule, see if it got better or worse than the previous
     for (rule, previous_rule_items) in &previous_ratchet.rules {
+        let mut previous_rule_count = 0;
+        let mut new_rule_count = 0;
+
         match ratchet_file.rules.get(rule) {
             Some(new_rule) => {
                 for (key, value) in previous_rule_items {
                     match new_rule.get(key) {
-                        Some(new_value) => match new_value.len().cmp(&value.len()) {
-                            Ordering::Greater => {
-                                println!("Rule {} has more items in the current file", rule);
-                            }
-                            Ordering::Less => {
-                                println!("Rule {} has fewer items in the current file", rule);
-                            }
-                            Ordering::Equal => {
-                                println!(
-                                    "Rule {} has the same number of items in both files",
-                                    rule
-                                );
-                            }
-                        },
+                        Some(new_value) => {
+                            previous_rule_count += value.len();
+                            new_rule_count += new_value.len();
+                        }
                         None => println!("Key: {:?} does not exist in the current file", key),
                     }
-                    println!("Key: {:?}, Value: {:?}", key, value);
                 }
             }
             None => println!("Rule {} does not exist in the current file", rule),
+        }
+
+        match new_rule_count.cmp(&previous_rule_count) {
+            Ordering::Greater => {
+                println!("❌ Rule {} got worse", rule);
+            }
+            Ordering::Less => {
+                println!("🛠️ Rule {} improved", rule);
+            }
+            Ordering::Equal => {
+                println!("✔️ Rule {} did not change", rule);
+            }
         }
     }
 
