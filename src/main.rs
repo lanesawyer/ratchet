@@ -14,6 +14,7 @@ struct Cli {
     command: Commands,
 }
 
+// TODO: Check if there's a way to make the subcommands more DRY
 #[derive(Subcommand)]
 enum Commands {
     /// Start a new ratchet project
@@ -34,6 +35,12 @@ enum Commands {
         #[clap(long, short, default_value = "ratchet.toml")]
         config: String,
     },
+    /// Check that no rules have been violated
+    Force {
+        /// Path to the config file to use, defaults to ratchet.toml in the current directory
+        #[clap(long, short, default_value = "ratchet.toml")]
+        config: String,
+    },
 }
 
 fn main() {
@@ -45,6 +52,7 @@ fn main() {
         Commands::Init { config } => ratchet::init(config),
         Commands::Turn { config } => ratchet::turn(config),
         Commands::Check { config } => ratchet::check(config),
+        Commands::Force { config } => ratchet::force(config),
     }
 
     let duration = start.elapsed().as_secs_f32();

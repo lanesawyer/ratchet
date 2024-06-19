@@ -60,7 +60,7 @@ type MessageText = String;
 type MessageHash = String;
 
 pub fn init(config: &String) {
-    println!("initializing ratchet!");
+    println!("🎬 Initializing ratchet!\n");
 
     let path = Path::new(config);
     if path.exists() {
@@ -72,16 +72,21 @@ pub fn init(config: &String) {
 }
 
 pub fn turn(config: &String) {
-    println!("Turning ratchet!");
-    process_rules(config, false);
+    println!("⚙️ Turning ratchet!\n");
+    process_rules(config, false, false);
 }
 
 pub fn check(config: &String) {
-    println!("Checking ratchet!");
-    process_rules(config, true)
+    println!("👀 Checking ratchet!\n");
+    process_rules(config, true, false)
 }
 
-fn process_rules(config_path: &String, is_check: bool) {
+pub fn force(config: &String) {
+    println!("⛓️‍💥 Forcing ratchet!\n");
+    process_rules(config, false, true);
+}
+
+fn process_rules(config_path: &String, is_check: bool, is_force: bool) {
     let config = read_config(config_path);
     // HACK: Test comment to get it in the RATCHET_FILE file
 
@@ -206,9 +211,9 @@ fn process_rules(config_path: &String, is_check: bool) {
         }
     }
 
-    // TODO: Get wrose, don't update
+    // TODO: Get worse, don't update
     // We don't want to update if we're just checking the state of the code or if things got worse
-    if !is_check && !got_worse {
+    if !is_check && !got_worse || is_force {
         ratchet_file.save();
     }
 }
