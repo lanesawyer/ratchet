@@ -7,6 +7,7 @@ use std::{
     fs::{read_to_string, File},
     io::Write,
     path::Path,
+    process,
 };
 use walkdir::WalkDir;
 
@@ -211,9 +212,13 @@ fn process_rules(config_path: &String, is_check: bool, is_force: bool) {
         }
     }
 
-    // TODO: Get worse, don't update
     // We don't want to update if we're just checking the state of the code or if things got worse
+    // OR if we're forcing the update
     if !is_check && !got_worse || is_force {
         ratchet_file.save();
+    }
+    // If we're checking and things got worse, exist with an error for CI
+    else if is_check && got_worse {
+        process::exit(1);
     }
 }
