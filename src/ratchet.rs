@@ -100,9 +100,41 @@ fn process_rules(is_check: bool) {
         println!("Regexp: {}", value.regex);
         let regex = Regex::new(&value.regex).expect("Failed to compile regex");
         println!("Regex: {:?}", regex);
+
+        // TODO: Clean the regexes up
+        let include_regex = value
+            .include
+            .as_ref()
+            .map(|include| Regex::new(include).expect("Failed to compile include regex"));
+
+        let exclude_regex = value
+            .exclude
+            .as_ref()
+            .map(|exclude| Regex::new(exclude).expect("Failed to compile include regex"));
+
         for entry in WalkDir::new("src") {
             let entry = entry.unwrap();
             if !entry.file_type().is_file() {
+                continue;
+            }
+
+            let path_str = entry.path().to_string_lossy();
+
+            if include_regex.is_some() && !include_regex.as_ref().unwrap().is_match(&path_str) {
+                println!(
+                    "Skipping (not included): {} for {}",
+                    entry.path().display(),
+                    key
+                );
+                continue;
+            }
+
+            if exclude_regex.is_some() && exclude_regex.as_ref().unwrap().is_match(&path_str) {
+                println!(
+                    "Skipping (excluded): {} for {}",
+                    entry.path().display(),
+                    key
+                );
                 continue;
             }
 
