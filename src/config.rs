@@ -15,6 +15,10 @@ pub struct RatchetConfig {
 pub struct RatchetRule {
     // TODO: Definitely revisit, not every rule is regex
     pub regex: String,
+    // TODO: Consider storing a Regex that can serialize/deserialize
+    pub include: Option<String>,
+    // TODO: Consider storing a Regex that can serialize/deserialize
+    pub exclude: Option<String>,
 }
 
 impl RatchetConfig {

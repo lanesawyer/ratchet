@@ -4,6 +4,8 @@ version = 1
 
 [rules."No more TODOs"]
 regex = "TODO"
+include = "src/main.rs"
 
 [rules."No more HACKS"]
 regex = "HACK( ALERT)?"
+exclude = "src/main.rs"
