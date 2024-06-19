@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use std::time::Instant;
 
 mod config;
 mod ratchet;
@@ -24,9 +25,14 @@ enum Commands {
 fn main() {
     let cli = Cli::parse();
 
+    let start = Instant::now();
+
     match &cli.command {
         Commands::Init => ratchet::init(),
         Commands::Turn => ratchet::turn(),
         Commands::Check => ratchet::check(),
     }
+
+    let duration = start.elapsed().as_secs_f32();
+    println!("⚡Ratchet finished in {:.2}s", duration);
 }
