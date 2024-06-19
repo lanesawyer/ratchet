@@ -6,10 +6,11 @@ use std::{
     collections::HashMap,
     fs::{read_to_string, File},
     io::Write,
+    path::Path,
 };
 use walkdir::WalkDir;
 
-use crate::config::read_config;
+use crate::config::{self, read_config, RATCHET_CONFIG};
 
 const RATCHET_FILE: &str = "ratchet.ron";
 
@@ -60,6 +61,14 @@ type MessageHash = String;
 
 pub fn init() {
     println!("initializing ratchet!");
+
+    let path = Path::new(RATCHET_CONFIG);
+    if path.exists() {
+        println!("Ratchet config already exists");
+        return;
+    }
+
+    config::RatchetConfig::init();
 }
 
 pub fn turn() {
