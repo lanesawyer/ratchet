@@ -16,8 +16,10 @@ pub struct RatchetRule {
     // TODO: Definitely revisit, not every rule is regex
     pub regex: String,
     // TODO: Consider storing a Regex that can serialize/deserialize
+    // TODO: Make an array of strings
     pub include: Option<String>,
     // TODO: Consider storing a Regex that can serialize/deserialize
+    // TODO: Make an array of strings
     pub exclude: Option<String>,
 }
 
@@ -44,6 +46,5 @@ pub fn read_config() -> RatchetConfig {
 
     let ratchet_config: RatchetConfig = toml::from_str(&contents).expect("Failed to deserialize");
 
-    println!("{:?}", ratchet_config);
     ratchet_config
 }

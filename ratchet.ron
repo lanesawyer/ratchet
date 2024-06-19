@@ -1,32 +1,47 @@
 (
     version: 1,
     rules: {
-        "No more TODOs": {
-            (
-                "src/ratchet.rs",
-                "hash_me",
-            ): [
-                /*[0]*/ (447, 451, "TODO", "hash_me"),
-                /*[1]*/ (668, 672, "TODO", "hash_me"),
-                /*[2]*/ (731, 735, "TODO", "hash_me"),
-                /*[3]*/ (1285, 1289, "TODO", "hash_me"),
-                /*[4]*/ (1578, 1582, "TODO", "hash_me"),
-                /*[5]*/ (2281, 2285, "TODO", "hash_me"),
-            ],
-            (
-                "src/config.rs",
-                "hash_me",
-            ): [
-                /*[0]*/ (148, 152, "TODO", "hash_me"),
-                /*[1]*/ (309, 313, "TODO", "hash_me"),
-            ],
-        },
         "No more HACKS": {
             (
-                "src/ratchet.rs",
+                "./src/ratchet.rs",
                 "hash_me",
             ): [
-                /*[0]*/ (2007, 2011, "HACK( ALERT)?", "hash_me"),
+                /*[0]*/ (2222, 2226, "HACK( ALERT)?", "hash_me"),
+            ],
+        },
+        "No more TODOs": {
+            (
+                "./README.md",
+                "hash_me",
+            ): [
+                /*[0]*/ (323, 327, "TODO", "hash_me"),
+                /*[1]*/ (1054, 1058, "TODO", "hash_me"),
+                /*[2]*/ (1508, 1512, "TODO", "hash_me"),
+            ],
+            (
+                "./src/config.rs",
+                "hash_me",
+            ): [
+                /*[0]*/ (233, 237, "TODO", "hash_me"),
+                /*[1]*/ (405, 409, "TODO", "hash_me"),
+                /*[2]*/ (485, 489, "TODO", "hash_me"),
+                /*[3]*/ (554, 558, "TODO", "hash_me"),
+                /*[4]*/ (625, 629, "TODO", "hash_me"),
+                /*[5]*/ (694, 698, "TODO", "hash_me"),
+            ],
+            (
+                "./src/ratchet.rs",
+                "hash_me",
+            ): [
+                /*[0]*/ (487, 491, "TODO", "hash_me"),
+                /*[1]*/ (708, 712, "TODO", "hash_me"),
+                /*[2]*/ (771, 775, "TODO", "hash_me"),
+                /*[3]*/ (1325, 1329, "TODO", "hash_me"),
+                /*[4]*/ (1618, 1622, "TODO", "hash_me"),
+                /*[5]*/ (2402, 2406, "TODO", "hash_me"),
+                /*[6]*/ (2619, 2623, "TODO", "hash_me"),
+                /*[7]*/ (3302, 3306, "TODO", "hash_me"),
+                /*[8]*/ (4176, 4180, "TODO", "hash_me"),
             ],
         },
     },
