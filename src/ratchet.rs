@@ -112,7 +112,7 @@ fn process_rules(is_check: bool) {
             .as_ref()
             .map(|exclude| Regex::new(exclude).expect("Failed to compile include regex"));
 
-        for entry in WalkDir::new("src") {
+        for entry in WalkDir::new(".") {
             let entry = entry.unwrap();
             if !entry.file_type().is_file() {
                 continue;
@@ -142,7 +142,7 @@ fn process_rules(is_check: bool) {
             // Failed to read file: Error { kind: InvalidData, message: "stream did not contain valid UTF-8" }
             let content = read_to_string(entry.path());
             if let Err(e) = content {
-                println!("Failed to read file: {:?}", e);
+                println!("Failed to read file, continuing: {:?}", e);
                 continue;
             }
             let content = content.unwrap();
