@@ -3,6 +3,12 @@
     rules: {
         "No more HACKS": {
             (
+                "./src/main.rs",
+                "hash_me",
+            ): [
+                /*[0]*/ (2021, 2025, "HACK( ALERT)?", "hash_me"),
+            ],
+            (
                 "./src/ratchet.rs",
                 "hash_me",
             ): [
@@ -26,8 +32,8 @@
                 /*[1]*/ (441, 445, "TODO", "hash_me"),
                 /*[2]*/ (521, 525, "TODO", "hash_me"),
                 /*[3]*/ (590, 594, "TODO", "hash_me"),
-                /*[4]*/ (661, 665, "TODO", "hash_me"),
-                /*[5]*/ (730, 734, "TODO", "hash_me"),
+                /*[4]*/ (666, 670, "TODO", "hash_me"),
+                /*[5]*/ (735, 739, "TODO", "hash_me"),
             ],
             (
                 "./src/main.rs",
@@ -41,8 +47,7 @@
             ): [
                 /*[0]*/ (1270, 1274, "TODO", "hash_me"),
                 /*[1]*/ (1488, 1492, "TODO", "hash_me"),
-                /*[2]*/ (2171, 2175, "TODO", "hash_me"),
-                /*[3]*/ (3045, 3049, "TODO", "hash_me"),
+                /*[2]*/ (2343, 2347, "TODO", "hash_me"),
             ],
             (
                 "./src/ratchet_file.rs",

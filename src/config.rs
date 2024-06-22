@@ -18,10 +18,10 @@ pub struct RatchetRule {
     pub regex: String,
     // TODO: Consider storing a Regex that can serialize/deserialize
     // TODO: Make an array of strings
-    pub include: Option<String>,
+    pub include: Option<Vec<String>>,
     // TODO: Consider storing a Regex that can serialize/deserialize
     // TODO: Make an array of strings
-    pub exclude: Option<String>,
+    pub exclude: Option<Vec<String>>,
 }
 
 impl RatchetConfig {
