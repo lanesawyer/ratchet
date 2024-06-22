@@ -2,6 +2,7 @@ use std::{collections::BTreeMap, fs, io::Write};
 
 use serde::{Deserialize, Serialize};
 
+pub const CONFIG_VERSION: u8 = 1;
 pub const RATCHET_CONFIG: &str = "ratchet.toml";
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -24,14 +25,17 @@ pub struct RatchetRule {
 }
 
 impl RatchetConfig {
-    pub fn init() {
-        let ratchet_config = RatchetConfig {
-            version: 1,
+    pub fn new() -> Self {
+        RatchetConfig {
+            version: CONFIG_VERSION,
             rules: BTreeMap::new(),
-        };
+        }
+    }
+
+    pub fn init() {
+        let ratchet_config = RatchetConfig::new();
 
         let toml = toml::to_string(&ratchet_config).expect("Failed to serialize");
-
         let toml = format!("{}\n", toml);
 
         let mut file = fs::File::create(RATCHET_CONFIG).expect("Failed to create file");
