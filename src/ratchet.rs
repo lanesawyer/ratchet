@@ -94,8 +94,6 @@ fn process_rules(config_path: &String, file: &String, is_check: bool, is_force: 
                 continue;
             }
 
-            // TODO: Got error running on another codebase:
-            // Failed to read file: Error { kind: InvalidData, message: "stream did not contain valid UTF-8" }
             let content = read_to_string(entry.path());
             if let Err(_e) = content {
                 // println!("Failed to read file, continuing: {:?}", e);
@@ -148,13 +146,13 @@ fn process_rules(config_path: &String, file: &String, is_check: bool, is_force: 
         got_worse = new_rule_count > previous_rule_count;
         match new_rule_count.cmp(&previous_rule_count) {
             Ordering::Greater => {
-                println!("❌ Rule {} got worse", rule);
+                println!("❌ Rule {} got worse ({} new issues out of {} total)", rule, new_rule_count - previous_rule_count, new_rule_count);
             }
             Ordering::Less => {
-                println!("🛠️ Rule {} improved", rule);
+                println!("🛠️ Rule {} improved ({} issues fixed out of {} total", rule, previous_rule_count - new_rule_count, new_rule_count);
             }
             Ordering::Equal => {
-                println!("✔️ Rule {} did not change", rule);
+                println!("✔️ Rule {} did not change ({} total)", rule, new_rule_count);
             }
         }
     }
