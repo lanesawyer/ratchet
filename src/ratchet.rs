@@ -1,71 +1,18 @@
 use regex::Regex;
-use ron::ser::PrettyConfig;
-use serde::{Deserialize, Serialize};
-use std::{
-    cmp::Ordering,
-    collections::BTreeMap,
-    fs::{read_to_string, File},
-    io::Write,
-    path::Path,
-    process,
-};
+use std::{cmp::Ordering, collections::BTreeMap, fs::read_to_string, path::Path, process};
 use walkdir::WalkDir;
 
-use crate::config::{self, read_config, RATCHET_CONFIG};
-
-const RATCHET_FILE: &str = "ratchet.ron";
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct RatchetFile {
-    pub version: u8,
-    pub rules: BTreeMap<RuleName, RuleMap>,
-}
-
-impl RatchetFile {
-    // TODO: Custom file location
-    pub fn load() -> Self {
-        let contents = read_to_string(RATCHET_FILE).expect("Failed to read file");
-        ron::de::from_str(&contents).expect("Failed to deserialize")
-    }
-
-    // TODO: Custom file location
-    pub fn save(&self) {
-        // TODO: Deterministic order on the BTreeMap printing
-        let pretty_config = PrettyConfig::new()
-            .depth_limit(4)
-            .separate_tuple_members(true)
-            .enumerate_arrays(true);
-        let ron = ron::ser::to_string_pretty(self, pretty_config).expect("Serialization failed");
-        let ron = format!("{}\n", ron);
-
-        let mut file = File::create(RATCHET_FILE).expect("Failed to create file");
-        file.write_all(ron.as_bytes())
-            .expect("Failed to write to file");
-    }
-}
-
-pub type RuleName = String;
-// TODO: Probably don't need file name and hash as the key
-pub type RuleMap = BTreeMap<(FileName, FileHash), Problems>;
-
-type FileName = String;
-type FileHash = String;
-type Problems = Vec<Problem>;
-
-type Problem = (Start, End, MessageText, MessageHash);
-
-type Start = usize;
-type End = usize;
-// TODO: The next two could be optional, rules like regex won't have a unique message
-type MessageText = String;
-type MessageHash = String;
+use crate::{
+    config::{self, read_config, RATCHET_CONFIG},
+    ratchet_file::{RatchetFile, RuleMap, RuleName, RATCHET_FILE},
+};
 
 pub fn init(config: &String) {
     println!("🎬 Initializing ratchet!\n");
 
     let path = Path::new(config);
     if path.exists() {
-        println!("Ratchet config already exists");
+        println!("Ratchet config already exists at {}", config);
         return;
     }
 
