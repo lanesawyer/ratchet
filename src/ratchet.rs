@@ -19,26 +19,26 @@ pub fn init(config: &String) {
     config::RatchetConfig::init();
 }
 
-pub fn turn(config: &String) {
+pub fn turn(config: &String, file: &String) {
     println!("⚙️ Turning ratchet!\n");
-    process_rules(config, false, false);
+    process_rules(config, file, false, false);
 }
 
-pub fn check(config: &String) {
+pub fn check(config: &String, file: &String) {
     println!("👀 Checking ratchet!\n");
-    process_rules(config, true, false)
+    process_rules(config, file, true, false)
 }
 
-pub fn force(config: &String) {
+pub fn force(config: &String, file: &String) {
     println!("⛓️‍💥 Forcing ratchet!\n");
-    process_rules(config, false, true);
+    process_rules(config, file, false, true);
 }
 
-fn process_rules(config_path: &String, is_check: bool, is_force: bool) {
+fn process_rules(config_path: &String, file: &String, is_check: bool, is_force: bool) {
     let config = read_config(config_path);
     // HACK: Test comment to get it in the RATCHET_FILE file
 
-    let previous_ratchet = RatchetFile::load();
+    let previous_ratchet = RatchetFile::load(file);
 
     let mut rules_map: BTreeMap<RuleName, RuleMap> = BTreeMap::new();
 
@@ -162,7 +162,7 @@ fn process_rules(config_path: &String, is_check: bool, is_force: bool) {
     // We don't want to update if we're just checking the state of the code or if things got worse
     // OR if we're forcing the update
     if !is_check && !got_worse || is_force {
-        ratchet_file.save();
+        ratchet_file.save(file);
     }
     // If we're checking and things got worse, exist with an error for CI
     else if is_check && got_worse {
