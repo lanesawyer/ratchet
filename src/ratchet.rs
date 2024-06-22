@@ -49,15 +49,19 @@ fn process_rules(config_path: &String, file: &String, is_check: bool, is_force: 
         let regex = Regex::new(&value.regex).expect("Failed to compile regex");
 
         // TODO: Clean the regexes up
-        let include_regex = value
-            .include
-            .as_ref()
-            .map(|include| Regex::new(include).expect("Failed to compile include regex"));
+        let include_regexes: Option<Vec<Regex>> = value.include.as_ref().map(|include| {
+            include
+                .iter()
+                .map(|i| Regex::new(i).expect("Failed to compile include regex"))
+                .collect()
+        });
 
-        let exclude_regex = value
-            .exclude
-            .as_ref()
-            .map(|exclude| Regex::new(exclude).expect("Failed to compile include regex"));
+        let exclude_regexes: Option<Vec<Regex>> = value.exclude.as_ref().map(|exclude| {
+            exclude
+                .iter()
+                .map(|e| Regex::new(e).expect("Failed to compile include regex"))
+                .collect()
+        });
 
         for entry in WalkDir::new(".") {
             let entry = entry.unwrap();
@@ -76,7 +80,13 @@ fn process_rules(config_path: &String, file: &String, is_check: bool, is_force: 
                 continue;
             }
 
-            if include_regex.is_some() && !include_regex.as_ref().unwrap().is_match(&path_str) {
+            if include_regexes.is_some()
+                && !include_regexes
+                    .as_ref()
+                    .unwrap()
+                    .iter()
+                    .any(|r| r.is_match(&path_str))
+            {
                 println!(
                     "Skipping (not included): {} for {}",
                     entry.path().display(),
@@ -85,7 +95,13 @@ fn process_rules(config_path: &String, file: &String, is_check: bool, is_force: 
                 continue;
             }
 
-            if exclude_regex.is_some() && exclude_regex.as_ref().unwrap().is_match(&path_str) {
+            if exclude_regexes.is_some()
+                && exclude_regexes
+                    .as_ref()
+                    .unwrap()
+                    .iter()
+                    .any(|r| r.is_match(&path_str))
+            {
                 println!(
                     "Skipping (excluded): {} for {}",
                     entry.path().display(),
@@ -146,10 +162,20 @@ fn process_rules(config_path: &String, file: &String, is_check: bool, is_force: 
         got_worse = new_rule_count > previous_rule_count;
         match new_rule_count.cmp(&previous_rule_count) {
             Ordering::Greater => {
-                println!("❌ Rule {} got worse ({} new issues out of {} total)", rule, new_rule_count - previous_rule_count, new_rule_count);
+                println!(
+                    "❌ Rule {} got worse ({} new issues out of {} total)",
+                    rule,
+                    new_rule_count - previous_rule_count,
+                    new_rule_count
+                );
             }
             Ordering::Less => {
-                println!("🛠️ Rule {} improved ({} issues fixed out of {} total", rule, previous_rule_count - new_rule_count, new_rule_count);
+                println!(
+                    "🛠️ Rule {} improved ({} issues fixed out of {} total)",
+                    rule,
+                    previous_rule_count - new_rule_count,
+                    new_rule_count
+                );
             }
             Ordering::Equal => {
                 println!("✔️ Rule {} did not change ({} total)", rule, new_rule_count);
