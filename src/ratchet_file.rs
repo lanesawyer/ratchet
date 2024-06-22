@@ -40,8 +40,8 @@ impl RatchetFile {
     }
 
     // TODO: Custom file location
-    pub fn load() -> Self {
-        let contents = read_to_string(RATCHET_FILE);
+    pub fn load(file: &String) -> Self {
+        let contents = read_to_string(file);
 
         if contents.is_err() {
             println!("No ratchet results file found, evaluating initial baseline");
@@ -51,9 +51,7 @@ impl RatchetFile {
         ron::de::from_str(&contents.unwrap()).expect("Failed to deserialize")
     }
 
-    // TODO: Custom file location
-    pub fn save(&self) {
-        // TODO: Deterministic order on the BTreeMap printing
+    pub fn save(&self, file: &String) {
         let pretty_config = PrettyConfig::new()
             .depth_limit(4)
             .separate_tuple_members(true)
@@ -61,7 +59,7 @@ impl RatchetFile {
         let ron = ron::ser::to_string_pretty(self, pretty_config).expect("Serialization failed");
         let ron = format!("{}\n", ron);
 
-        let mut file = File::create(RATCHET_FILE).expect("Failed to create file");
+        let mut file = File::create(file).expect("Failed to create file");
         file.write_all(ron.as_bytes())
             .expect("Failed to write to file");
     }

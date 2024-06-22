@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use ratchet_file::RATCHET_FILE;
 use std::time::Instant;
 
 use config::RATCHET_CONFIG;
@@ -29,18 +30,27 @@ enum Commands {
         /// Path to the config file to use, defaults to ratchet.toml in the current directory
         #[clap(long, short, default_value = RATCHET_CONFIG)]
         config: String,
+        /// Path for location of ratchet file, defaults to ratchet.ron in the current directory
+        #[clap(long, short, default_value = RATCHET_FILE)]
+        file: String,
     },
     /// Check that no rules have been violated
     Check {
         /// Path to the config file to use, defaults to ratchet.toml in the current directory
         #[clap(long, short, default_value = "ratchet.toml")]
         config: String,
+        /// Path for location of ratchet file, defaults to ratchet.ron in the current directory
+        #[clap(long, short, default_value = RATCHET_FILE)]
+        file: String,
     },
     /// Check that no rules have been violated
     Force {
         /// Path to the config file to use, defaults to ratchet.toml in the current directory
         #[clap(long, short, default_value = "ratchet.toml")]
         config: String,
+        /// Path for location of ratchet file, defaults to ratchet.ron in the current directory
+        #[clap(long, short, default_value = RATCHET_FILE)]
+        file: String,
     },
 }
 
@@ -51,9 +61,9 @@ fn main() {
 
     match &cli.command {
         Commands::Init { config } => ratchet::init(config),
-        Commands::Turn { config } => ratchet::turn(config),
-        Commands::Check { config } => ratchet::check(config),
-        Commands::Force { config } => ratchet::force(config),
+        Commands::Turn { config, file } => ratchet::turn(config, file),
+        Commands::Check { config, file } => ratchet::check(config, file),
+        Commands::Force { config, file } => ratchet::force(config, file),
     }
 
     let duration = start.elapsed().as_secs_f32();
