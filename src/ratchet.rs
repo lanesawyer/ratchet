@@ -1,5 +1,5 @@
 use regex::Regex;
-use std::{cmp::Ordering, collections::BTreeMap, fs::read_to_string, path::Path, process};
+use std::{collections::BTreeMap, fs::read_to_string, path::Path, process};
 use walkdir::WalkDir;
 
 use crate::{
@@ -119,7 +119,9 @@ fn process_rules(config_path: &String, file: &String, is_check: bool, is_force: 
 
             let matches: Vec<_> = regex.find_iter(&content).collect();
             for found in matches {
-                let key = (entry.path().display().to_string(), "hash_me".to_string());
+                // TODO: The actual hashing, but the compare function needs fixing first
+                // let file_hash = seahash::hash(content.as_bytes());
+                let key = (entry.path().display().to_string(), 1234);
                 let value = (
                     found.start(),
                     found.end(),
@@ -132,61 +134,17 @@ fn process_rules(config_path: &String, file: &String, is_check: bool, is_force: 
         rules_map.insert(key.to_string(), rule_map);
     });
 
-    let ratchet_file = RatchetFile {
+    let new_ratchet = RatchetFile {
         version: config.version,
         rules: rules_map,
     };
 
-    let mut got_worse = false;
-
-    // for each rule, see if it got better or worse than the previous
-    for (rule, previous_rule_items) in &previous_ratchet.rules {
-        let mut previous_rule_count = 0;
-        let mut new_rule_count = 0;
-
-        match ratchet_file.rules.get(rule) {
-            Some(new_rule) => {
-                for (key, value) in previous_rule_items {
-                    match new_rule.get(key) {
-                        Some(new_value) => {
-                            previous_rule_count += value.len();
-                            new_rule_count += new_value.len();
-                        }
-                        None => println!("Key: {:?} does not exist in the current file", key),
-                    }
-                }
-            }
-            None => println!("Rule {} does not exist in the current file", rule),
-        }
-
-        got_worse = new_rule_count > previous_rule_count;
-        match new_rule_count.cmp(&previous_rule_count) {
-            Ordering::Greater => {
-                println!(
-                    "❌ Rule {} got worse ({} new issues out of {} total)",
-                    rule,
-                    new_rule_count - previous_rule_count,
-                    new_rule_count
-                );
-            }
-            Ordering::Less => {
-                println!(
-                    "🛠️ Rule {} improved ({} issues fixed out of {} total)",
-                    rule,
-                    previous_rule_count - new_rule_count,
-                    new_rule_count
-                );
-            }
-            Ordering::Equal => {
-                println!("✔️ Rule {} did not change ({} total)", rule, new_rule_count);
-            }
-        }
-    }
+    let got_worse = previous_ratchet.compare(&new_ratchet);
 
     // We don't want to update if we're just checking the state of the code or if things got worse
     // OR if we're forcing the update
     if !is_check && !got_worse || is_force {
-        ratchet_file.save(file);
+        new_ratchet.save(file);
     }
     // If we're checking and things got worse, exist with an error for CI
     else if is_check && got_worse {
