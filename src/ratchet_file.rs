@@ -220,4 +220,28 @@ mod test {
 
         assert!(!previous_file.compare_new(&new_file));
     }
+
+    #[test]
+    fn file_rename_no_changes_returns_same() {
+        let mut previous_rule_issues = super::RuleMap::new();
+        previous_rule_issues.insert(
+            ("file1".into(), 1234),
+            vec![(1, 2, "message".into(), "hash".into())],
+        );
+
+        let mut previous_file = super::RatchetFile::new();
+        previous_file
+            .rules
+            .insert(TEST_RULE_ONE.into(), previous_rule_issues);
+
+        let mut new_rule_issues = super::RuleMap::new();
+        new_rule_issues.insert(
+            ("file1_renamed".into(), 1234),
+            vec![(1, 2, "message".into(), "hash".into())],
+        );
+        let mut new_file = super::RatchetFile::new();
+        new_file.rules.insert(TEST_RULE_ONE.into(), new_rule_issues);
+
+        assert!(!previous_file.compare(&new_file));
+    }
 }

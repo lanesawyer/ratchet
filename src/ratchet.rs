@@ -21,20 +21,31 @@ pub fn init(config: &String) {
 
 pub fn turn(config: &String, file: &String) {
     println!("⚙️ Turning ratchet!\n");
-    process_rules(config, file, false, false);
+    let (got_worse, new_ratchet) = process_rules(config, file);
+
+    if !got_worse {
+        new_ratchet.save(file);
+    }
 }
 
 pub fn check(config: &String, file: &String) {
     println!("👀 Checking ratchet!\n");
-    process_rules(config, file, true, false)
+    let (got_worse, _) = process_rules(config, file);
+
+    if got_worse {
+        process::exit(1);
+    }
 }
 
 pub fn force(config: &String, file: &String) {
     println!("⛓️‍💥 Forcing ratchet!\n");
-    process_rules(config, file, false, true);
+    let (_, new_ratchet) = process_rules(config, file);
+
+    // We don't care if things got better or worse, we're saving regardless!
+    new_ratchet.save(file);
 }
 
-fn process_rules(config_path: &String, file: &String, is_check: bool, is_force: bool) {
+fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
     let config = read_config(config_path);
     // HACK: Test comment to get it in the RATCHET_FILE file
 
@@ -141,13 +152,5 @@ fn process_rules(config_path: &String, file: &String, is_check: bool, is_force: 
 
     let got_worse = previous_ratchet.compare(&new_ratchet);
 
-    // We don't want to update if we're just checking the state of the code or if things got worse
-    // OR if we're forcing the update
-    if !is_check && !got_worse || is_force {
-        new_ratchet.save(file);
-    }
-    // If we're checking and things got worse, exist with an error for CI
-    else if is_check && got_worse {
-        process::exit(1);
-    }
+    (got_worse, new_ratchet)
 }
