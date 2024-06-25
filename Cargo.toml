@@ -10,3 +10,4 @@ regex = "1.10.5"
 serde = { version = "1.0.203", features = ["derive"] }
 toml = "0.8.14"
 walkdir = "2.5.0"
+seahash = "4.1.0"
