@@ -10,7 +10,7 @@ Provide a brief description of what this PR does.
 Provide a brief description of how the new code works.
 
 ## Testing
-Provide a brief description of any manual testing steps necessary.
+Provide a brief description of any manual testing steps necessary and any automated tests that were added.
 
 ## PR Checklist
 - [ ] I have read the [CONTRIBUTING.md](CONTRIBUTING.md) document.
