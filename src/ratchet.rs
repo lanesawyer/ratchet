@@ -3,8 +3,8 @@ use std::{collections::BTreeMap, fs::read_to_string, path::Path, process};
 use walkdir::WalkDir;
 
 use crate::{
-    config::{self, read_config, RATCHET_CONFIG},
-    ratchet_file::{RatchetFile, RuleMap, RuleName, RATCHET_FILE},
+    config::{self, read_config, WELL_KNOWN_FILES},
+    ratchet_file::{RatchetFile, RuleMap, RuleName},
 };
 
 pub fn init(config: &String) {
@@ -82,11 +82,9 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
             }
 
             let path_str = entry.path().to_string_lossy();
-
-            // TODO: Better way to ignore well-known files
-            if path_str.ends_with(RATCHET_FILE)
-                || path_str.ends_with(RATCHET_CONFIG)
-                || path_str.contains(".git")
+            if WELL_KNOWN_FILES
+                .iter()
+                .any(|&pattern| path_str.ends_with(pattern) || path_str.contains(pattern))
             {
                 continue;
             }
