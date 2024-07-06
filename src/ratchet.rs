@@ -1,91 +1,55 @@
 use regex::Regex;
-use ron::ser::PrettyConfig;
-use serde::{Deserialize, Serialize};
-use std::{
-    cmp::Ordering,
-    collections::BTreeMap,
-    fs::{read_to_string, File},
-    io::Write,
-    path::Path,
-};
+use std::{collections::BTreeMap, fs::read_to_string, path::Path, process};
 use walkdir::WalkDir;
 
-use crate::config::{self, read_config, RATCHET_CONFIG};
-
-const RATCHET_FILE: &str = "ratchet.ron";
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct RatchetFile {
-    pub version: u8,
-    pub rules: BTreeMap<RuleName, RuleMap>,
-}
-
-impl RatchetFile {
-    // TODO: Custom file location
-    pub fn load() -> Self {
-        let contents = read_to_string(RATCHET_FILE).expect("Failed to read file");
-        ron::de::from_str(&contents).expect("Failed to deserialize")
-    }
-
-    // TODO: Custom file location
-    pub fn save(&self) {
-        // TODO: Deterministic order on the BTreeMap printing
-        let pretty_config = PrettyConfig::new()
-            .depth_limit(4)
-            .separate_tuple_members(true)
-            .enumerate_arrays(true);
-        let ron = ron::ser::to_string_pretty(self, pretty_config).expect("Serialization failed");
-        let ron = format!("{}\n", ron);
-
-        let mut file = File::create(RATCHET_FILE).expect("Failed to create file");
-        file.write_all(ron.as_bytes())
-            .expect("Failed to write to file");
-    }
-}
-
-pub type RuleName = String;
-// TODO: Probably don't need file name and hash as the key
-pub type RuleMap = BTreeMap<(FileName, FileHash), Problems>;
-
-type FileName = String;
-type FileHash = String;
-type Problems = Vec<Problem>;
-
-type Problem = (Start, End, MessageText, MessageHash);
-
-type Start = usize;
-type End = usize;
-// TODO: The next two could be optional, rules like regex won't have a unique message
-type MessageText = String;
-type MessageHash = String;
+use crate::{
+    config::{self, read_config, RATCHET_CONFIG},
+    ratchet_file::{RatchetFile, RuleMap, RuleName, RATCHET_FILE},
+};
 
 pub fn init(config: &String) {
-    println!("initializing ratchet!");
+    println!("🎬 Initializing ratchet!\n");
 
     let path = Path::new(config);
     if path.exists() {
-        println!("Ratchet config already exists");
+        println!("Ratchet config already exists at {}", config);
         return;
     }
 
     config::RatchetConfig::init();
 }
 
-pub fn turn(config: &String) {
-    println!("Turning ratchet!");
-    process_rules(config, false);
+pub fn turn(config: &String, file: &String) {
+    println!("⚙️ Turning ratchet!\n");
+    let (got_worse, new_ratchet) = process_rules(config, file);
+
+    if !got_worse {
+        new_ratchet.save(file);
+    }
 }
 
-pub fn check(config: &String) {
-    println!("Checking ratchet!");
-    process_rules(config, true)
+pub fn check(config: &String, file: &String) {
+    println!("👀 Checking ratchet!\n");
+    let (got_worse, _) = process_rules(config, file);
+
+    if got_worse {
+        process::exit(1);
+    }
 }
 
-fn process_rules(config_path: &String, is_check: bool) {
+pub fn force(config: &String, file: &String) {
+    println!("⛓️‍💥 Forcing ratchet!\n");
+    let (_, new_ratchet) = process_rules(config, file);
+
+    // We don't care if things got better or worse, we're saving regardless!
+    new_ratchet.save(file);
+}
+
+fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
     let config = read_config(config_path);
     // HACK: Test comment to get it in the RATCHET_FILE file
 
-    let previous_ratchet = RatchetFile::load();
+    let previous_ratchet = RatchetFile::load(file);
 
     let mut rules_map: BTreeMap<RuleName, RuleMap> = BTreeMap::new();
 
@@ -96,15 +60,19 @@ fn process_rules(config_path: &String, is_check: bool) {
         let regex = Regex::new(&value.regex).expect("Failed to compile regex");
 
         // TODO: Clean the regexes up
-        let include_regex = value
-            .include
-            .as_ref()
-            .map(|include| Regex::new(include).expect("Failed to compile include regex"));
+        let include_regexes: Option<Vec<Regex>> = value.include.as_ref().map(|include| {
+            include
+                .iter()
+                .map(|i| Regex::new(i).expect("Failed to compile include regex"))
+                .collect()
+        });
 
-        let exclude_regex = value
-            .exclude
-            .as_ref()
-            .map(|exclude| Regex::new(exclude).expect("Failed to compile include regex"));
+        let exclude_regexes: Option<Vec<Regex>> = value.exclude.as_ref().map(|exclude| {
+            exclude
+                .iter()
+                .map(|e| Regex::new(e).expect("Failed to compile include regex"))
+                .collect()
+        });
 
         for entry in WalkDir::new(".") {
             let entry = entry.unwrap();
@@ -123,7 +91,13 @@ fn process_rules(config_path: &String, is_check: bool) {
                 continue;
             }
 
-            if include_regex.is_some() && !include_regex.as_ref().unwrap().is_match(&path_str) {
+            if include_regexes.is_some()
+                && !include_regexes
+                    .as_ref()
+                    .unwrap()
+                    .iter()
+                    .any(|r| r.is_match(&path_str))
+            {
                 println!(
                     "Skipping (not included): {} for {}",
                     entry.path().display(),
@@ -132,7 +106,13 @@ fn process_rules(config_path: &String, is_check: bool) {
                 continue;
             }
 
-            if exclude_regex.is_some() && exclude_regex.as_ref().unwrap().is_match(&path_str) {
+            if exclude_regexes.is_some()
+                && exclude_regexes
+                    .as_ref()
+                    .unwrap()
+                    .iter()
+                    .any(|r| r.is_match(&path_str))
+            {
                 println!(
                     "Skipping (excluded): {} for {}",
                     entry.path().display(),
@@ -141,8 +121,6 @@ fn process_rules(config_path: &String, is_check: bool) {
                 continue;
             }
 
-            // TODO: Got error running on another codebase:
-            // Failed to read file: Error { kind: InvalidData, message: "stream did not contain valid UTF-8" }
             let content = read_to_string(entry.path());
             if let Err(_e) = content {
                 // println!("Failed to read file, continuing: {:?}", e);
@@ -152,7 +130,9 @@ fn process_rules(config_path: &String, is_check: bool) {
 
             let matches: Vec<_> = regex.find_iter(&content).collect();
             for found in matches {
-                let key = (entry.path().display().to_string(), "hash_me".to_string());
+                // TODO: The actual hashing, but the compare function needs fixing first
+                // let file_hash = seahash::hash(content.as_bytes());
+                let key = (entry.path().display().to_string(), 1234);
                 let value = (
                     found.start(),
                     found.end(),
@@ -165,45 +145,12 @@ fn process_rules(config_path: &String, is_check: bool) {
         rules_map.insert(key.to_string(), rule_map);
     });
 
-    let ratchet_file = RatchetFile {
+    let new_ratchet = RatchetFile {
         version: config.version,
         rules: rules_map,
     };
 
-    // for each rule, see if it got better or worse than the previous
-    for (rule, previous_rule_items) in &previous_ratchet.rules {
-        let mut previous_rule_count = 0;
-        let mut new_rule_count = 0;
+    let got_worse = previous_ratchet.compare(&new_ratchet);
 
-        match ratchet_file.rules.get(rule) {
-            Some(new_rule) => {
-                for (key, value) in previous_rule_items {
-                    match new_rule.get(key) {
-                        Some(new_value) => {
-                            previous_rule_count += value.len();
-                            new_rule_count += new_value.len();
-                        }
-                        None => println!("Key: {:?} does not exist in the current file", key),
-                    }
-                }
-            }
-            None => println!("Rule {} does not exist in the current file", rule),
-        }
-
-        match new_rule_count.cmp(&previous_rule_count) {
-            Ordering::Greater => {
-                println!("❌ Rule {} got worse", rule);
-            }
-            Ordering::Less => {
-                println!("🛠️ Rule {} improved", rule);
-            }
-            Ordering::Equal => {
-                println!("✔️ Rule {} did not change", rule);
-            }
-        }
-    }
-
-    if !is_check {
-        ratchet_file.save();
-    }
+    (got_worse, new_ratchet)
 }
