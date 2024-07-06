@@ -2,8 +2,13 @@ use std::{collections::BTreeMap, fs, io::Write};
 
 use serde::{Deserialize, Serialize};
 
+use crate::ratchet_file::RATCHET_FILE;
+
 pub const CONFIG_VERSION: u8 = 1;
 pub const RATCHET_CONFIG: &str = "ratchet.toml";
+
+// TODO: What else should be considered well known?
+pub const WELL_KNOWN_FILES: [&str; 3] = [RATCHET_FILE, RATCHET_CONFIG, ".git"];
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RatchetConfig {
