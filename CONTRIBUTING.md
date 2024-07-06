@@ -90,7 +90,7 @@ Once it's filed:
 - A team member will try to reproduce the issue with your provided steps. If there are no reproduction steps or no obvious way to reproduce the issue, the team will ask you for those steps and mark the issue as `needs-repro`. Bugs with the `needs-repro` tag will not be addressed until they are reproduced.
 - If the team is able to reproduce the issue, it will be marked `needs-fix`, as well as possibly other tags (such as `critical`), and the issue will be left to be [implemented by someone](#your-first-code-contribution).
 
-<!-- You might want to create an issue template for bugs and errors that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
+We have an issue template for bug reports that will help you provide the necessary information.
 
 
 ### Suggesting Enhancements
@@ -116,28 +116,22 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/lanesa
 - You may want to **include screenshots and animated GIFs** which help you demonstrate the steps or point out the part which the suggestion is related to. You can use [this tool](https://www.cockos.com/licecap/) to record GIFs on macOS and Windows, and [this tool](https://github.com/colinkeenan/silentcast) or [this tool](https://github.com/GNOME/byzanz) on Linux. <!-- this should only be included if the project has a GUI -->
 - **Explain why this enhancement would be useful** to most Ratchet users. You may also want to point out the other projects that solved it better and which could serve as inspiration.
 
-<!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
+We have an issue template for feature requests that will help you provide the necessary information.
 
 ### Your First Code Contribution
-<!-- TODO
-include Setup of env, IDE and typical getting started instructions?
-
--->
+1. Download the codebase
+2. Install Rust
+3. Start coding!
 
 ### Improving The Documentation
-<!-- TODO
-Updating, improving and correcting the documentation
-
--->
+We don't have much documentation right now so all improvements are welcome! Commenting code, writing up usage guides, adding tests, etc. are all great ways to help out.
 
 ## Styleguides
 ### Commit Messages
-<!-- TODO
-
--->
+We use [Conventional Commits](https://www.conventionalcommits.org). Only the squashed commit message needs to follow the standard, so feel free to commit on your on branch however you would like. We'll make sure it's the proper format when merging in your PR!
 
 ## Join The Project Team
-<!-- TODO -->
+If you'd like to join the team, start contributing! Regular contributors will be invited to join the team when we've reached that point in the growth of the project.
 
 <!-- omit in toc -->
 ## Attribution
