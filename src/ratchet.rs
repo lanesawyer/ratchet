@@ -1,10 +1,10 @@
-use regex::Regex;
 use std::{collections::BTreeMap, fs::read_to_string, path::Path, process};
 use walkdir::WalkDir;
 
 use crate::{
     config::{self, read_config, WELL_KNOWN_FILES},
     ratchet_file::{RatchetFile, RuleMap, RuleName},
+    rule::{RegexRule, Rule},
 };
 
 pub fn init(config: &String) {
@@ -55,24 +55,13 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
 
     // TODO: Parallelize this someday
     config.rules.iter().for_each(|(key, value)| {
-        let mut rule_map = BTreeMap::new();
+        let mut rule_map: RuleMap = BTreeMap::new();
 
-        let regex = Regex::new(&value.regex).expect("Failed to compile regex");
-
-        // TODO: Clean the regexes up
-        let include_regexes: Option<Vec<Regex>> = value.include.as_ref().map(|include| {
-            include
-                .iter()
-                .map(|i| Regex::new(i).expect("Failed to compile include regex"))
-                .collect()
-        });
-
-        let exclude_regexes: Option<Vec<Regex>> = value.exclude.as_ref().map(|exclude| {
-            exclude
-                .iter()
-                .map(|e| Regex::new(e).expect("Failed to compile include regex"))
-                .collect()
-        });
+        let rule = RegexRule {
+            regex: value.regex.clone(),
+            include: value.include.clone(),
+            exclude: value.exclude.clone(),
+        };
 
         for entry in WalkDir::new(".") {
             let entry = entry.unwrap();
@@ -89,33 +78,8 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
                 continue;
             }
 
-            if include_regexes.is_some()
-                && !include_regexes
-                    .as_ref()
-                    .unwrap()
-                    .iter()
-                    .any(|r| r.is_match(&path_str))
-            {
-                println!(
-                    "Skipping (not included): {} for {}",
-                    entry.path().display(),
-                    key
-                );
-                continue;
-            }
-
-            if exclude_regexes.is_some()
-                && exclude_regexes
-                    .as_ref()
-                    .unwrap()
-                    .iter()
-                    .any(|r| r.is_match(&path_str))
-            {
-                println!(
-                    "Skipping (excluded): {} for {}",
-                    entry.path().display(),
-                    key
-                );
+            if !rule.analyze_file(&path_str) {
+                println!("Skipping: {} for {}", entry.path().display(), key);
                 continue;
             }
 
@@ -126,19 +90,14 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
             }
             let content = content.unwrap();
 
-            let matches: Vec<_> = regex.find_iter(&content).collect();
-            for found in matches {
-                // TODO: The actual hashing, but the compare function needs fixing first
-                // let file_hash = seahash::hash(content.as_bytes());
-                let key = (entry.path().display().to_string(), 1234);
-                let value = (
-                    found.start(),
-                    found.end(),
-                    regex.to_string(),
-                    "hash_me".to_string(),
-                );
-                rule_map.entry(key).or_insert_with(Vec::new).push(value);
+            let problems = rule.check(&path_str, &content);
+            if problems.is_empty() {
+                continue;
             }
+
+            // TODO: The actual hashing, but the compare function needs fixing first
+            // let file_hash = seahash::hash(content.as_bytes());
+            rule_map.insert((path_str.to_string(), 1234), problems);
         }
         rules_map.insert(key.to_string(), rule_map);
     });

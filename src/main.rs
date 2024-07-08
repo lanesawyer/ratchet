@@ -7,6 +7,7 @@ use config::RATCHET_CONFIG;
 mod config;
 mod ratchet;
 mod ratchet_file;
+mod rule;
 
 /// Ratchet is a tool to help you add new rules to your project over time
 #[derive(Parser)]

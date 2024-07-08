@@ -8,7 +8,16 @@ pub const CONFIG_VERSION: u8 = 1;
 pub const RATCHET_CONFIG: &str = "ratchet.toml";
 
 // TODO: What else should be considered well known?
-pub const WELL_KNOWN_FILES: [&str; 3] = [RATCHET_FILE, RATCHET_CONFIG, ".git"];
+pub const WELL_KNOWN_FILES: [&str; 4] = [
+    // Ratchet specific
+    RATCHET_FILE,
+    RATCHET_CONFIG,
+    // No need to look in the git folder!
+    ".git",
+    // Rust specific
+    // TODO: What if they're not running from root directory
+    "./target",
+];
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RatchetConfig {
@@ -17,6 +26,7 @@ pub struct RatchetConfig {
     pub rules: BTreeMap<String, RatchetRule>,
 }
 
+// TODO: Unify with the RegexRule, make the config just take Rule implementations
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RatchetRule {
     // TODO: Definitely revisit, not every rule is regex
