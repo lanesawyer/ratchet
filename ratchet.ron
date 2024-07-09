@@ -3,7 +3,7 @@
     rules: {
         "No more HACKS": {
             (
-                "./src/ratchet.rs",
+                "./packages/ratchet/src/ratchet.rs",
                 1234,
             ): [
                 /*[0]*/ (1312, 1316, "HACK( ALERT)?", "hash_me"),
@@ -19,33 +19,34 @@
                 /*[2]*/ (1508, 1512, "TODO", "hash_me"),
             ],
             (
-                "./src/config.rs",
+                "./packages/ratchet-cli/src/main.rs",
+                1234,
+            ): [
+                /*[0]*/ (309, 313, "TODO", "hash_me"),
+            ],
+            (
+                "./packages/ratchet/src/config.rs",
                 1234,
             ): [
                 /*[0]*/ (215, 219, "TODO", "hash_me"),
                 /*[1]*/ (450, 454, "TODO", "hash_me"),
                 /*[2]*/ (620, 624, "TODO", "hash_me"),
-                /*[3]*/ (793, 797, "TODO", "hash_me"),
-                /*[4]*/ (873, 877, "TODO", "hash_me"),
-                /*[5]*/ (942, 946, "TODO", "hash_me"),
-                /*[6]*/ (1018, 1022, "TODO", "hash_me"),
-                /*[7]*/ (1087, 1091, "TODO", "hash_me"),
+                /*[3]*/ (723, 727, "TODO", "hash_me"),
+                /*[4]*/ (875, 879, "TODO", "hash_me"),
+                /*[5]*/ (955, 959, "TODO", "hash_me"),
+                /*[6]*/ (1024, 1028, "TODO", "hash_me"),
+                /*[7]*/ (1100, 1104, "TODO", "hash_me"),
+                /*[8]*/ (1169, 1173, "TODO", "hash_me"),
             ],
             (
-                "./src/main.rs",
-                1234,
-            ): [
-                /*[0]*/ (379, 383, "TODO", "hash_me"),
-            ],
-            (
-                "./src/ratchet.rs",
+                "./packages/ratchet/src/ratchet.rs",
                 1234,
             ): [
                 /*[0]*/ (1498, 1502, "TODO", "hash_me"),
                 /*[1]*/ (2880, 2884, "TODO", "hash_me"),
             ],
             (
-                "./src/ratchet_file.rs",
+                "./packages/ratchet/src/ratchet_file.rs",
                 1234,
             ): [
                 /*[0]*/ (425, 429, "TODO", "hash_me"),
