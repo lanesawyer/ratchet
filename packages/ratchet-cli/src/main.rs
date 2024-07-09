@@ -1,13 +1,6 @@
 use clap::{Parser, Subcommand};
-use ratchet_file::RATCHET_FILE;
+use ratchet::{RATCHET_CONFIG, RATCHET_FILE};
 use std::time::Instant;
-
-use config::RATCHET_CONFIG;
-
-mod config;
-mod ratchet;
-mod ratchet_file;
-mod rule;
 
 /// Ratchet is a tool to help you add new rules to your project over time
 #[derive(Parser)]
