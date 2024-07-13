@@ -70,7 +70,8 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
                 continue;
             }
 
-            let path_str = entry.path().to_string_lossy();
+            // I don't know how robust this is, but it works fine on windows now
+            let path_str = entry.path().to_string_lossy().replace("\\", "/");
             if WELL_KNOWN_FILES
                 .iter()
                 .any(|&pattern| path_str.ends_with(pattern) || path_str.contains(pattern))
