@@ -4,15 +4,15 @@
         "No more HACKS": {
             (
                 "./packages/ratchet/src/ratchet.rs",
-                1234,
+                1010763637869220865,
             ): [
-                /*[0]*/ (1312, 1316, "HACK( ALERT)?", "hash_me"),
+                /*[0]*/ (1374, 1378, "HACK( ALERT)?", "hash_me"),
             ],
         },
         "No more TODOs": {
             (
                 "./README.md",
-                1234,
+                12176637566222439714,
             ): [
                 /*[0]*/ (323, 327, "TODO", "hash_me"),
                 /*[1]*/ (1054, 1058, "TODO", "hash_me"),
@@ -20,13 +20,13 @@
             ],
             (
                 "./packages/ratchet-cli/src/main.rs",
-                1234,
+                3563840405771877954,
             ): [
                 /*[0]*/ (309, 313, "TODO", "hash_me"),
             ],
             (
                 "./packages/ratchet/src/config.rs",
-                1234,
+                2123751355126410226,
             ): [
                 /*[0]*/ (215, 219, "TODO", "hash_me"),
                 /*[1]*/ (450, 454, "TODO", "hash_me"),
@@ -40,14 +40,14 @@
             ],
             (
                 "./packages/ratchet/src/ratchet.rs",
-                1234,
+                1010763637869220865,
             ): [
-                /*[0]*/ (1498, 1502, "TODO", "hash_me"),
-                /*[1]*/ (2880, 2884, "TODO", "hash_me"),
+                /*[0]*/ (1560, 1564, "TODO", "hash_me"),
+                /*[1]*/ (3035, 3039, "TODO", "hash_me"),
             ],
             (
                 "./packages/ratchet/src/ratchet_file.rs",
-                1234,
+                10681399594338204015,
             ): [
                 /*[0]*/ (425, 429, "TODO", "hash_me"),
                 /*[1]*/ (716, 720, "TODO", "hash_me"),
