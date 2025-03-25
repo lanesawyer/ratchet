@@ -4,7 +4,7 @@ use walkdir::WalkDir;
 use crate::{
     config::{self, read_config, WELL_KNOWN_FILES},
     ratchet_file::{RatchetFile, RuleMap, RuleName},
-    rule::{RegexRule, Rule},
+    rules::rule::Rule,
     utils::{to_normalized_file_contents, to_normalized_path},
 };
 
@@ -58,12 +58,6 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
     config.rules.iter().for_each(|(key, value)| {
         let mut rule_map: RuleMap = BTreeMap::new();
 
-        let rule = RegexRule {
-            regex: value.regex.clone(),
-            include: value.include.clone(),
-            exclude: value.exclude.clone(),
-        };
-
         for entry in WalkDir::new(".") {
             let entry = entry.unwrap();
             // If it's not a file, there's nothing to analyze. Keep going!
@@ -80,7 +74,7 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
                 continue;
             }
 
-            if !rule.analyze_file(&path_str) {
+            if !value.analyze_file(&path_str) {
                 println!("Skipping: {} for {}", os_path.display(), key);
                 continue;
             }
@@ -94,7 +88,7 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
             let content = content.unwrap();
             let content = to_normalized_file_contents(&content);
 
-            let problems = rule.check(&path_str, &content);
+            let problems = value.check(&path_str, &content);
             if problems.is_empty() {
                 continue;
             }

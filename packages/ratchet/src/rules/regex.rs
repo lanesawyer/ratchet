@@ -1,41 +1,18 @@
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 
-pub trait Rule {
-    /// Default implementation to determine if a file should be analyzed
-    fn analyze_file(&self, path: &str) -> bool {
-        if self.include().is_some() {
-            let include = self.include().unwrap();
-            if !include.iter().any(|r| r.is_match(path)) {
-                return false;
-            }
-        }
+use crate::ratchet_file::Problem;
 
-        if self.exclude().is_some() {
-            let exclude = self.exclude().unwrap();
-            if exclude.iter().any(|r| r.is_match(path)) {
-                return false;
-            }
-        }
-
-        true
-    }
-
-    // todo: what's this look like
-    fn check(&self, path: &str, content: &str) -> Vec<(usize, usize, String, String)>;
-
-    fn include(&self) -> Option<Vec<Regex>>;
-    fn exclude(&self) -> Option<Vec<Regex>>;
-}
-
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RegexRule {
     pub regex: String,
     pub include: Option<Vec<String>>,
     pub exclude: Option<Vec<String>>,
 }
 
-impl Rule for RegexRule {
-    fn check(&self, path: &str, content: &str) -> Vec<(usize, usize, String, String)> {
-        let mut problems: Vec<(usize, usize, String, String)> = Vec::new();
+impl RegexRule {
+    pub fn check(&self, path: &str, content: &str) -> Vec<Problem> {
+        let mut problems: Vec<Problem> = Vec::new();
 
         let rule_regex = Regex::new(&self.regex).expect("Failed to compile regex");
         let matches: Vec<_> = rule_regex.find_iter(content).collect();

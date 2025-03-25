@@ -26,7 +26,7 @@ type FileName = String;
 type FileHash = u64;
 type Problems = Vec<Problem>;
 
-type Problem = (Start, End, MessageText, MessageHash);
+pub type Problem = (Start, End, MessageText, MessageHash);
 
 /// Start and end are the character positions in the file
 type Start = usize;

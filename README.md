@@ -22,4 +22,4 @@ Ratchet's ultimate goal is to be uninstalled from your codebase. As you've fixed
 
 ## Contributing
 
-TODO: Add contributing guidelines and figure out the license
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more information on how to contribute to Ratchet.

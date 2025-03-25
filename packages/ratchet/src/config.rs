@@ -2,7 +2,7 @@ use std::{collections::BTreeMap, fs, io::Write};
 
 use serde::{Deserialize, Serialize};
 
-use crate::ratchet_file::RATCHET_FILE;
+use crate::{ratchet_file::RATCHET_FILE, rules::RatchetRule};
 
 pub const CONFIG_VERSION: u8 = 1;
 pub const RATCHET_CONFIG: &str = "ratchet.toml";
@@ -24,19 +24,6 @@ pub struct RatchetConfig {
     pub version: u8,
     // TODO: I don't think I like this structure, revisit
     pub rules: BTreeMap<String, RatchetRule>,
-}
-
-// TODO: Unify with the RegexRule, make the config just take Rule implementations
-#[derive(Debug, Deserialize, Serialize)]
-pub struct RatchetRule {
-    // TODO: Definitely revisit, not every rule is regex
-    pub regex: String,
-    // TODO: Consider storing a Regex that can serialize/deserialize
-    // TODO: Make an array of strings
-    pub include: Option<Vec<String>>,
-    // TODO: Consider storing a Regex that can serialize/deserialize
-    // TODO: Make an array of strings
-    pub exclude: Option<Vec<String>>,
 }
 
 impl RatchetConfig {
