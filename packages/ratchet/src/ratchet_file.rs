@@ -57,7 +57,6 @@ impl RatchetFile {
             .separate_tuple_members(true)
             .enumerate_arrays(true);
         let ron = ron::ser::to_string_pretty(self, pretty_config).expect("Serialization failed");
-        let ron = format!("{}\n", ron);
 
         let mut file = File::create(file).expect("Failed to create file");
         file.write_all(ron.as_bytes())

@@ -5,6 +5,7 @@ use crate::{
     config::{self, read_config, WELL_KNOWN_FILES},
     ratchet_file::{RatchetFile, RuleMap, RuleName},
     rule::{RegexRule, Rule},
+    utils::{to_normalized_file_contents, to_normalized_path},
 };
 
 pub fn init(config: &String) {
@@ -70,7 +71,8 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
                 continue;
             }
 
-            let path_str = entry.path().to_string_lossy();
+            let os_path = entry.path();
+            let path_str = to_normalized_path(os_path);
             if WELL_KNOWN_FILES
                 .iter()
                 .any(|&pattern| path_str.ends_with(pattern) || path_str.contains(pattern))
@@ -79,16 +81,18 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
             }
 
             if !rule.analyze_file(&path_str) {
-                println!("Skipping: {} for {}", entry.path().display(), key);
+                println!("Skipping: {} for {}", os_path.display(), key);
                 continue;
             }
 
-            let content = read_to_string(entry.path());
+            let content = read_to_string(os_path);
             if let Err(_e) = content {
                 // println!("Failed to read file, continuing: {:?}", e);
                 continue;
             }
+
             let content = content.unwrap();
+            let content = to_normalized_file_contents(&content);
 
             let problems = rule.check(&path_str, &content);
             if problems.is_empty() {
@@ -96,8 +100,8 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
             }
 
             // TODO: The actual hashing, but the compare function needs fixing first
-            // let file_hash = seahash::hash(content.as_bytes());
-            rule_map.insert((path_str.to_string(), 1234), problems);
+            let file_hash = seahash::hash(content.as_bytes());
+            rule_map.insert((path_str, file_hash), problems);
         }
         rules_map.insert(key.to_string(), rule_map);
     });
