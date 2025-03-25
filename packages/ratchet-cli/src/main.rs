@@ -37,7 +37,7 @@ enum Commands {
         #[clap(long, short, default_value = RATCHET_FILE)]
         file: String,
     },
-    /// Check that no rules have been violated
+    /// Force the results to be updated, even if they got worse
     Force {
         /// Path to the config file to use, defaults to ratchet.toml in the current directory
         #[clap(long, short, default_value = "ratchet.toml")]

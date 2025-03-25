@@ -45,7 +45,7 @@ impl Rule for RegexRule {
                 found.start(),
                 found.end(),
                 rule_regex.to_string(),
-                "hash_me".to_string(),
+                seahash::hash(rule_regex.as_str().as_bytes()).to_string(),
             );
             problems.push(value);
         }
