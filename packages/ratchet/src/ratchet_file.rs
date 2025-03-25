@@ -7,7 +7,9 @@ use std::{
     io::Write,
 };
 
+/// Current version of the ratchet file format, past versions may not be compatible
 pub const RATCHET_FILE_VERSION: u8 = 1;
+/// Default file name for the ratchet file
 pub const RATCHET_FILE: &str = "ratchet.ron";
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -26,6 +28,7 @@ type Problems = Vec<Problem>;
 
 type Problem = (Start, End, MessageText, MessageHash);
 
+/// Start and end are the character positions in the file
 type Start = usize;
 type End = usize;
 // TODO: The next two could be optional, rules like regex won't have a unique message
@@ -48,7 +51,8 @@ impl RatchetFile {
             return RatchetFile::new();
         }
 
-        ron::de::from_str(&contents.unwrap()).expect("Failed to deserialize")
+        ron::de::from_str(&contents.unwrap())
+            .expect("Failed to deserialize, RON file may be corrupt or an old version")
     }
 
     pub fn save(&self, file: &String) {
@@ -89,7 +93,10 @@ impl RatchetFile {
                 // That means we should ditch the count from the old rule and add the new rule
                 // ... but we can't, because we don't know the new one. So we need to go through
                 // any new ones that weren't in the old one, and add up those! Shoot.
-                None => println!("Rule {} does not exist in the current file", rule),
+                None => println!(
+                    "Rule {} does not exist in the current file, needs fixing",
+                    rule
+                ),
             }
 
             got_worse = new_rule_count > previous_rule_count;
@@ -169,7 +176,7 @@ mod test {
         let mut previous_rule_issues = super::RuleMap::new();
         previous_rule_issues.insert(
             ("file1".into(), 1234),
-            vec![(1, 2, "message".into(), "hash".into())],
+            vec![(1, 2, "message1".into(), "hash1".into())],
         );
 
         let mut previous_file = super::RatchetFile::new();
@@ -179,11 +186,11 @@ mod test {
 
         let mut new_rule_issues = super::RuleMap::new();
         new_rule_issues.insert(
-            // TODO: Change the hash once we have file hashing
-            ("file1".into(), 1234),
+            // Note the fake hash, it's different because the file "changed"
+            ("file1".into(), 4321),
             vec![
-                (1, 2, "message1".into(), "hash".into()),
-                (3, 4, "message2".into(), "hash".into()),
+                (1, 2, "message1".into(), "hash1".into()),
+                (3, 4, "message2".into(), "hash2".into()),
             ],
         );
         let mut new_file = super::RatchetFile::new();

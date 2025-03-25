@@ -99,7 +99,6 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
                 continue;
             }
 
-            // TODO: The actual hashing, but the compare function needs fixing first
             let file_hash = seahash::hash(content.as_bytes());
             rule_map.insert((path_str, file_hash), problems);
         }
