@@ -80,14 +80,9 @@ impl RatchetFile {
             let new_rule_items = new_ratchet.rules.get(rule);
 
             if let Some(new_rule_items) = new_rule_items {
-                let (new_count, old_count) = compare_btrees(previous_rule_items, new_rule_items);
+                let (new_count, old_count) = compare_rule_maps(previous_rule_items, new_rule_items);
                 previous_rule_count = old_count;
                 new_rule_count = new_count;
-            } else {
-                println!(
-                    "Rule {} does not exist in the current file, new one added! That's technically worse, but also because you're newly tracking.. hm",
-                    rule
-                );
             }
 
             got_worse = new_rule_count > previous_rule_count;
@@ -118,10 +113,7 @@ impl RatchetFile {
     }
 }
 
-pub fn compare_btrees(
-    old_map: &RuleMap,
-    new_map: &RuleMap,
-) -> (usize, usize) {
+fn compare_rule_maps(old_map: &RuleMap, new_map: &RuleMap) -> (usize, usize) {
     let mut total_old_issues = 0;
     let mut total_new_issues = 0;
 
