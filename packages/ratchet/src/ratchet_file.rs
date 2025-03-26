@@ -77,26 +77,17 @@ impl RatchetFile {
             let mut previous_rule_count = 0;
             let mut new_rule_count = 0;
 
-            match new_ratchet.rules.get(rule) {
-                Some(new_rule) => {
-                    for (key, value) in previous_rule_items {
-                        match new_rule.get(key) {
-                            Some(new_value) => {
-                                previous_rule_count += value.len();
-                                new_rule_count += new_value.len();
-                            }
-                            None => println!("Key: {:?} does not exist in the current file", key),
-                        }
-                    }
-                }
-                // TODO: If a rule wasn't found, it could be because the hash changed!
-                // That means we should ditch the count from the old rule and add the new rule
-                // ... but we can't, because we don't know the new one. So we need to go through
-                // any new ones that weren't in the old one, and add up those! Shoot.
-                None => println!(
-                    "Rule {} does not exist in the current file, needs fixing",
+            let new_rule_items = new_ratchet.rules.get(rule);
+
+            if let Some(new_rule_items) = new_rule_items {
+                let (new_count, old_count) = compare_btrees(previous_rule_items, new_rule_items);
+                previous_rule_count = old_count;
+                new_rule_count = new_count;
+            } else {
+                println!(
+                    "Rule {} does not exist in the current file, new one added! That's technically worse, but also because you're newly tracking.. hm",
                     rule
-                ),
+                );
             }
 
             got_worse = new_rule_count > previous_rule_count;
@@ -122,49 +113,40 @@ impl RatchetFile {
                 }
             }
         }
+
         got_worse
     }
+}
 
-    pub fn compare_new(&self, new_ratchet: &Self) -> bool {
-        let mut total_old_issues = 0;
-        let mut total_new_issues = 0;
+pub fn compare_btrees(
+    old_map: &RuleMap,
+    new_map: &RuleMap,
+) -> (usize, usize) {
+    let mut total_old_issues = 0;
+    let mut total_new_issues = 0;
 
-        // Step 2: Iterate through old rules
-        for (rule, previous_rule_items) in &self.rules {
-            let mut rule_old_count = 0;
-            let mut rule_new_count = 0;
-
-            if let Some(new_rule) = new_ratchet.rules.get(rule) {
-                // Rule exists in both old and new sets
-                for (key, value) in previous_rule_items {
-                    rule_old_count += value.len();
-                    if let Some(new_value) = new_rule.get(key) {
-                        rule_new_count += new_value.len();
-                    }
-                }
-            } else {
-                // Rule does not exist in new set, count all issues from old
-                for value in previous_rule_items.values() {
-                    rule_old_count += value.len();
-                }
-            }
-
-            total_old_issues += rule_old_count;
-            total_new_issues += rule_new_count;
+    // Step 1: Iterate through the old map
+    for (key, old_problems) in old_map {
+        if let Some(new_problems) = new_map.get(key) {
+            // Key exists in both maps, count issues from both
+            total_old_issues += old_problems.len();
+            total_new_issues += new_problems.len();
+        } else {
+            // Key exists only in the old map
+            total_old_issues += old_problems.len();
         }
-
-        // Step 3: Iterate through new rules that weren't in old rules
-        for (rule, new_rule_items) in &new_ratchet.rules {
-            if !&self.rules.contains_key(rule) {
-                // This is a new rule, count its issues
-                for value in new_rule_items.values() {
-                    total_new_issues += value.len();
-                }
-            }
-        }
-
-        total_new_issues > total_old_issues
     }
+
+    // Step 2: Iterate through the new map
+    for (key, new_problems) in new_map {
+        if !old_map.contains_key(key) {
+            // Key exists only in the new map
+            total_new_issues += new_problems.len();
+        }
+    }
+
+    // Step 3: Return totals so we can log properly and report if it got worse
+    (total_new_issues, total_old_issues)
 }
 
 #[cfg(test)]
@@ -182,7 +164,7 @@ mod test {
         let mut previous_file = super::RatchetFile::new();
         previous_file
             .rules
-            .insert("test_rule".into(), previous_rule_issues);
+            .insert(TEST_RULE_ONE.into(), previous_rule_issues);
 
         let mut new_rule_issues = super::RuleMap::new();
         new_rule_issues.insert(
@@ -196,7 +178,7 @@ mod test {
         let mut new_file = super::RatchetFile::new();
         new_file.rules.insert(TEST_RULE_ONE.into(), new_rule_issues);
 
-        assert!(previous_file.compare_new(&new_file));
+        assert!(previous_file.compare(&new_file));
     }
 
     #[test]
@@ -217,14 +199,13 @@ mod test {
 
         let mut new_rule_issues = super::RuleMap::new();
         new_rule_issues.insert(
-            // TODO: Change the hash once we have file hashing
-            ("file1".into(), 1234),
+            ("file1".into(), 4321),
             vec![(1, 2, "message1".into(), "hash".into())],
         );
         let mut new_file = super::RatchetFile::new();
         new_file.rules.insert(TEST_RULE_ONE.into(), new_rule_issues);
 
-        assert!(!previous_file.compare_new(&new_file));
+        assert!(!previous_file.compare(&new_file));
     }
 
     #[test]
