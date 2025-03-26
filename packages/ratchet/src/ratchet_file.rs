@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
     collections::BTreeMap,
-    fs::{read_to_string, File},
+    fs::{File, read_to_string},
     io::Write,
 };
 
