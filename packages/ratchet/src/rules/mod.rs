@@ -9,13 +9,13 @@ use todo::TodoRule;
 
 use crate::ratchet_file::Problem;
 
+#[non_exhaustive]
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "type")] // Use a "type" field in the serialized data to distinguish rule types
 pub enum RatchetRule {
     Regex(RegexRule),
     Todo(TodoRule),
     // Add other rule types here
-    // Example: Custom(CustomRule),
 }
 
 impl Rule for RatchetRule {
@@ -23,8 +23,6 @@ impl Rule for RatchetRule {
         match self {
             RatchetRule::Regex(rule) => rule.check(path, content),
             RatchetRule::Todo(rule) => rule.check(path, content),
-            // Add other rule implementations here
-            // RuleEnum::Custom(rule) => rule.check(path, content),
         }
     }
 }

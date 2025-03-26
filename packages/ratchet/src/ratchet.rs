@@ -55,7 +55,7 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
     let mut rules_map: BTreeMap<RuleName, RuleMap> = BTreeMap::new();
 
     // TODO: Parallelize this someday
-    config.rules.iter().for_each(|(key, value)| {
+    config.rules.iter().for_each(|(key, rule)| {
         let mut rule_map: RuleMap = BTreeMap::new();
 
         for entry in WalkDir::new(".") {
@@ -74,7 +74,7 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
                 continue;
             }
 
-            if !value.analyze_file(&path_str) {
+            if !rule.analyze_file(&path_str) {
                 println!("Skipping: {} for {}", os_path.display(), key);
                 continue;
             }
@@ -88,7 +88,7 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
             let content = content.unwrap();
             let content = to_normalized_file_contents(&content);
 
-            let problems = value.check(&path_str, &content);
+            let problems = rule.check(&path_str, &content);
             if problems.is_empty() {
                 continue;
             }
