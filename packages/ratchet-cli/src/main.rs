@@ -10,6 +10,8 @@ struct Cli {
     command: Commands,
 }
 
+// HACK: Test that this comment isn't picked up
+
 // TODO: Check if there's a way to make the subcommands more DRY
 #[derive(Subcommand)]
 enum Commands {

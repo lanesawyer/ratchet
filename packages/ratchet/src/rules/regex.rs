@@ -30,7 +30,7 @@ impl RegexRule {
         problems
     }
 
-    fn include(&self) -> Option<Vec<Regex>> {
+    pub fn include(&self) -> Option<Vec<Regex>> {
         self.include.as_ref().map(|include| {
             include
                 .iter()
@@ -39,7 +39,7 @@ impl RegexRule {
         })
     }
 
-    fn exclude(&self) -> Option<Vec<Regex>> {
+    pub fn exclude(&self) -> Option<Vec<Regex>> {
         self.exclude.as_ref().map(|exclude| {
             exclude
                 .iter()

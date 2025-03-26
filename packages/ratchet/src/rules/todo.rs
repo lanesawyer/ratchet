@@ -30,4 +30,22 @@ impl TodoRule {
 
         problems
     }
+
+    pub fn include(&self) -> Option<Vec<Regex>> {
+        self.include.as_ref().map(|include| {
+            include
+                .iter()
+                .map(|i| Regex::new(i).expect("Failed to compile include regex"))
+                .collect()
+        })
+    }
+
+    pub fn exclude(&self) -> Option<Vec<Regex>> {
+        self.exclude.as_ref().map(|exclude| {
+            exclude
+                .iter()
+                .map(|e| Regex::new(e).expect("Failed to compile exclude regex"))
+                .collect()
+        })
+    }
 }

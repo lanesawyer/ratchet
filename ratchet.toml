@@ -9,4 +9,4 @@ type = "Todo"
 [rules."No more HACKS"]
 type = "Regex"
 regex = "HACK( ALERT)?"
-# exclude = ["src/main.rs"]
+exclude = ["src/main.rs"]

@@ -15,14 +15,32 @@ use crate::ratchet_file::Problem;
 pub enum RatchetRule {
     Regex(RegexRule),
     Todo(TodoRule),
-    // Add other rule types here
+    // Add other rule types here, make sure to add to the macro call below
 }
 
-impl Rule for RatchetRule {
-    fn check(&self, path: &str, content: &str) -> Vec<Problem> {
-        match self {
-            RatchetRule::Regex(rule) => rule.check(path, content),
-            RatchetRule::Todo(rule) => rule.check(path, content),
+/// Macro to call the inner type of each enum value to power the Rule trait functionality
+macro_rules! impl_functions_for_rule_types {
+    ($($variant:ident),*) => {
+        impl Rule for RatchetRule {
+            fn check(&self, path: &str, content: &str) -> Vec<Problem> {
+                match self {
+                    $(Self::$variant(rule) => rule.check(path, content),)*
+                }
+            }
+
+            fn include(&self) -> Option<Vec<::regex::Regex>> {
+                match self {
+                    $(Self::$variant(rule) => rule.include(),)*
+                }
+            }
+
+            fn exclude(&self) -> Option<Vec<::regex::Regex>> {
+                match self {
+                    $(Self::$variant(rule) => rule.exclude(),)*
+                }
+            }
         }
-    }
+    };
 }
+
+impl_functions_for_rule_types!(Regex, Todo);
