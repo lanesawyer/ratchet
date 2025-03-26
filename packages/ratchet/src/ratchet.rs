@@ -2,7 +2,7 @@ use std::{collections::BTreeMap, fs::read_to_string, path::Path, process};
 use walkdir::WalkDir;
 
 use crate::{
-    config::{self, read_config, WELL_KNOWN_FILES},
+    config::{self, WELL_KNOWN_FILES, read_config},
     ratchet_file::{RatchetFile, RuleMap, RuleName},
     rule::{RegexRule, Rule},
     utils::{to_normalized_file_contents, to_normalized_path},
