@@ -4,7 +4,7 @@ use walkdir::WalkDir;
 use crate::{
     config::{self, WELL_KNOWN_FILES, read_config},
     ratchet_file::{RatchetFile, RuleMap, RuleName},
-    rule::{RegexRule, Rule},
+    rules::rule::Rule,
     utils::{to_normalized_file_contents, to_normalized_path},
 };
 
@@ -55,14 +55,8 @@ fn process_rules(config_path: &String, file: &String) -> (bool, RatchetFile) {
     let mut rules_map: BTreeMap<RuleName, RuleMap> = BTreeMap::new();
 
     // TODO: Parallelize this someday
-    config.rules.iter().for_each(|(key, value)| {
+    config.rules.iter().for_each(|(key, rule)| {
         let mut rule_map: RuleMap = BTreeMap::new();
-
-        let rule = RegexRule {
-            regex: value.regex.clone(),
-            include: value.include.clone(),
-            exclude: value.exclude.clone(),
-        };
 
         for entry in WalkDir::new(".") {
             let entry = entry.unwrap();

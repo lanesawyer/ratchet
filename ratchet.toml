@@ -3,9 +3,10 @@ version = 1
 [rules]
 
 [rules."No more TODOs"]
-regex = "TODO"
+type = "Todo"
 # include = ["src/**/*"]
 
 [rules."No more HACKS"]
+type = "Regex"
 regex = "HACK( ALERT)?"
-# exclude = ["src/main.rs"]
+exclude = ["src/main.rs"]

@@ -1,7 +1,7 @@
 mod config;
 mod ratchet;
 mod ratchet_file;
-mod rule;
+mod rules;
 mod utils;
 
 pub use crate::config::RATCHET_CONFIG;
