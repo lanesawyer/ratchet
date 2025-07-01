@@ -38,7 +38,7 @@ impl RatchetConfig {
         let ratchet_config = RatchetConfig::new();
 
         let toml = toml::to_string(&ratchet_config).expect("Failed to serialize");
-        let toml = format!("{}\n", toml);
+        let toml = format!("{toml}\n");
 
         let mut file = fs::File::create(RATCHET_CONFIG).expect("Failed to create file");
         file.write_all(toml.as_bytes())

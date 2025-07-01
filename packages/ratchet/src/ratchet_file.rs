@@ -104,7 +104,7 @@ impl RatchetFile {
                     );
                 }
                 Ordering::Equal => {
-                    println!("✔️ Rule {} did not change ({} total)", rule, new_rule_count);
+                    println!("✔️ Rule {rule} did not change ({new_rule_count} total)");
                 }
             }
         }
