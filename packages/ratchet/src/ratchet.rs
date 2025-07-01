@@ -13,7 +13,7 @@ pub fn init(config: &String) {
 
     let path = Path::new(config);
     if path.exists() {
-        println!("Ratchet config already exists at {}", config);
+        println!("Ratchet config already exists at {config}");
         return;
     }
 
