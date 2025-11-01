@@ -8,6 +8,6 @@ clap = { version = "4.5.48", features = ["derive"] }
 ron = "0.11.0"
 regex = "1.11.3"
 serde = { version = "1.0.219", features = ["derive"] }
-toml = "0.9.7"
+toml = "0.9.8"
 walkdir = "2.5.0"
 seahash = "4.1.0"
